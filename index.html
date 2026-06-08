@@ -44,9 +44,10 @@
 
         resultsDiv.innerHTML = "<p class='loading'>Fetching SLK data...</p>";
 
-        try {
+         try {
             // ✅ IRIS API CALL
-            const streetUrl = `https://maps.googleapis.com/maps/api/streetview?size=400x300&location=${lat},${lon}&radius=100&key=${apiKey}`;
+            const response = await fetch(
+                `https://publicirisservices.mainroads.wa.gov.au/GpsSlkWeb/GpsSlkWeb.svc/rest/GetPossibleSlks?latitude=${lat}&longitude=${lon}&tolerance=50`
             );
 
             const json = await response.json();
@@ -69,7 +70,7 @@
             // ✅ STREET VIEW IMAGE
             // ✅ UPDATED: Request the nearest panorama
             // The 'radius' parameter tells Google to search within 50 meters
-            const streetUrl = `https://maps.googleapis.com/maps/api/streetview?size=400x300&location=${lat},${lon}&radius=50&key=${apiKey}`;
+            const streetUrl = `https://maps.googleapis.com/maps/api/streetview?size=400x300&location=${lat},${lon}&radius=100&key=${apiKey}`;
 
             svDiv.innerHTML = `
                 <img 
