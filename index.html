@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SLK Lookup Engine</title>
+    <style>
+        body { font-family: sans-serif; padding: 15px; color: #333; }
+        .result-box { border: 1px solid #ccc; padding: 10px; border-radius: 5px; background: #f9f9f9; }
+        img { width: 100%; height: auto; margin-top: 15px; border-radius: 5px; }
+        .loading { color: #666; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <div id="results" class="result-box">
+            <p class="loading">Waiting for coordinates...</p>
+        </div>
+        <div id="streetview"></div>
+    </div>
+
+    <script>
+        // 1. Get Lat/Lon from URL
+        const params = new URLSearchParams(window.location.search);
+        const lat = params.get('lat');
+        const lon = params.get('lon');
+
+        if (lat && lon) {
+            fetchSLK(lat, lon);
+        }
+
+        async function fetchSLK(lat, lon) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = "Fetching SLK data...";
+
+            try {
+                // 2. CALL YOUR IRIS API HERE
+                // Replace the URL below with your actual API endpoint
+                const response = await fetch(`YOUR_API_URL_HERE?lat=${lat}&lon=${lon}`);
+                const data = await response.json();
+
+                // 3. RENDER DATA (Adjust these fields to match your JSON structure)
+                resultsDiv.innerHTML = `
+                    <h3>Road: ${data.roadName || 'N/A'}</h3>
+                    <p><strong>SLK:</strong> ${data.slk || 'N/A'}</p>
+                    <p><strong>Carriageway:</strong> ${data.carriageway || 'N/A'}</p>
+                `;
+
+                // 4. GENERATE GOOGLE STREET VIEW
+                const apiKey = 'YOUR_GOOGLE_API_KEY_HERE';
+                const svDiv = document.getElementById('streetview');
+                svDiv.innerHTML = `<img src="https://maps.googleapis.com/maps/api/streetview?size=400x300&location=${lat},${lon}&key=${apiKey}" alt="Street View">`;
+
+            } catch (error) {
+                resultsDiv.innerHTML = "Error fetching data. Check your API endpoint.";
+            }
+        }
+    </script>
+</body>
+</html>
