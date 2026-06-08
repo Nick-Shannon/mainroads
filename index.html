@@ -73,7 +73,7 @@
             const streetUrl = `https://maps.googleapis.com/maps/api/streetview?size=400x300&location=${lat},${lon}&radius=100&heading=0&pitch=0&key=${apiKey}`;
 
             const img = new Image();
-            img.src = streetUrl;
+            img.src = streetUrl;img.onerror
             img.alt = "Street View";
             img.style.width = "100%";
             img.style.marginTop = "15px";
@@ -84,7 +84,9 @@
             };
 
         img.onerror = () => {
-        svDiv.innerHTML = "<p>No Street View available at this location.</p>";
+            // This will tell us the exact URL the browser tried to load
+            console.log("Failed to load image from:", img.src);
+            svDiv.innerHTML = `<p>Error loading Street View. <a href="${img.src}" target="_blank">Click here to see why.</a></p>`;
         };
 
         } catch (error) {
