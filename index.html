@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,55 +8,82 @@
     <style>
         body { font-family: sans-serif; padding: 15px; color: #333; }
         .result-box { border: 1px solid #ccc; padding: 10px; border-radius: 5px; background: #f9f9f9; }
+        .result-item { margin-bottom: 10px; }
         img { width: 100%; height: auto; margin-top: 15px; border-radius: 5px; }
         .loading { color: #666; font-style: italic; }
+        .error { color: red; }
     </style>
 </head>
 <body>
 
-    <div id="app">
-        <div id="results" class="result-box">
-            <p class="loading">Waiting for coordinates...</p>
-        </div>
-        <div id="streetview"></div>
+<div id="app">
+    <div id="results" class="result-box">
+        <p class="loading">Waiting for coordinates...</p>
     </div>
+    <div id="streetview"></div>
+</div>
 
-    <script>
-        // 1. Get Lat/Lon from URL
-        const params = new URLSearchParams(window.location.search);
-        const lat = params.get('lat');
-        const lon = params.get('lon');
+<script>
+    // ✅ GET PARAMETERS
+    const params = new URLSearchParams(window.location.search);
+    const lat = params.get('lat');
+    const lon = params.get('lon');
 
-        if (lat && lon) {
-            fetchSLK(lat, lon);
-        }
+    // ✅ YOUR GOOGLE API KEY (restricted)
+    const apiKey = 'AIzaSyAGUEBMCOV4B95XLD39S5YmssuTfjInqFk';
 
-        async function fetchSLK(lat, lon) {
-            const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = "Fetching SLK data...";
+    if (!lat || !lon) {
+        document.getElementById('results').innerHTML = "No coordinates provided.";
+    } else {
+        fetchSLK(lat, lon);
+    }
 
-            try {
-                // 2. CALL YOUR IRIS API HERE
-                // Replace the URL below with your actual API endpoint
-                const response = await fetch(`YOUR_API_URL_HERE?lat=${lat}&lon=${lon}`);
-                const data = await response.json();
+    async function fetchSLK(lat, lon) {
+        const resultsDiv = document.getElementById('results');
+        const svDiv = document.getElementById('streetview');
 
-                // 3. RENDER DATA (Adjust these fields to match your JSON structure)
-                resultsDiv.innerHTML = `
-                    <h3>Road: ${data.roadName || 'N/A'}</h3>
-                    <p><strong>SLK:</strong> ${data.slk || 'N/A'}</p>
-                    <p><strong>Carriageway:</strong> ${data.carriageway || 'N/A'}</p>
-                `;
+        resultsDiv.innerHTML = "<p class='loading'>Fetching SLK data...</p>";
 
-                // 4. GENERATE GOOGLE STREET VIEW
-                const apiKey = 'YOUR_GOOGLE_API_KEY_HERE';
-                const svDiv = document.getElementById('streetview');
-                svDiv.innerHTML = `<img src="https://maps.googleapis.com/maps/api/streetview?size=400x300&location=${lat},${lon}&key=${apiKey}" alt="Street View">`;
+        try {
+            // ✅ IRIS API CALL
+            const response = await fetch(
+                `https://publicirisservices.mainroads.wa.gov.au/GpsSlkWeb/GpsSlkWeb.svc/rest/GetPossibleSlks?latitude=${lat}&longitude=${lon}&tolerance=50`
+            );
 
-            } catch (error) {
-                resultsDiv.innerHTML = "Error fetching data. Check your API endpoint.";
+            const json = await response.json();
+            const data = json.GetPossibleSlksResult || json;
+
+            // ✅ DISPLAY RESULTS
+            if (data && data.length > 0) {
+                resultsDiv.innerHTML = data.map(item => `
+                    <div class="result-item">
+                        <h4>${item.RoadName}</h4>
+                        <p><strong>Road No:</strong> ${item.RoadNo}</p>
+                        <p><strong>SLK:</strong> ${item.FormattedSlk}</p>
+                        <p><strong>Carriageway:</strong> ${item.CarriageWay}</p>
+                    </div>
+                `).join("<hr>");
+            } else {
+                resultsDiv.innerHTML = "No SLK results found.";
             }
+
+            // ✅ STREET VIEW IMAGE
+            const streetUrl = `https://maps.googleapis.com/maps/api/streetview?size=400x300&location=${lat},${lon}&key=${apiKey}`;
+
+            svDiv.innerHTML = `
+                <img 
+                    src="${streetUrl}" 
+                    alt="Street View"
+                    onerror="this.outerHTML='<p>No Street View available at this location.</p>'"
+                >
+            `;
+
+        } catch (error) {
+            console.error(error);
+            resultsDiv.innerHTML = "<p class='error'>Error fetching SLK data.</p>";
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>
