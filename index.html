@@ -68,26 +68,25 @@
             }
 
             // ✅ STREET VIEW IMAGE
-           // ✅ REPLACE your existing Street View block with this:
             const svDiv = document.getElementById('streetview');
             const streetUrl = `https://maps.googleapis.com/maps/api/streetview?size=400x300&location=${lat},${lon}&radius=100&heading=0&pitch=0&key=${apiKey}`;
 
             const img = new Image();
-            img.src = streetUrl;img.onerror
+            img.src = streetUrl;
             img.alt = "Street View";
             img.style.width = "100%";
             img.style.marginTop = "15px";
 
             img.onload = () => {
-                svDiv.innerHTML = ""; // Clear any loading text
+                svDiv.innerHTML = ""; 
                 svDiv.appendChild(img);
             };
 
-        img.onerror = () => {
-            // This will tell us the exact URL the browser tried to load
-            console.log("Failed to load image from:", img.src);
-            svDiv.innerHTML = `<p>Error loading Street View. <a href="${img.src}" target="_blank">Click here to see why.</a></p>`;
-        };
+            img.onerror = () => {
+                console.log("Failed to load image from:", img.src);
+                svDiv.innerHTML = `<p>No Street View available at this location.</p>`;
+            };
+            // --- END OF NEW BLOCK ---
 
         } catch (error) {
             console.error(error);
