@@ -46,8 +46,7 @@
 
         try {
             // ✅ IRIS API CALL
-            const response = await fetch(
-                `https://publicirisservices.mainroads.wa.gov.au/GpsSlkWeb/GpsSlkWeb.svc/rest/GetPossibleSlks?latitude=${lat}&longitude=${lon}&tolerance=50`
+            const streetUrl = `https://maps.googleapis.com/maps/api/streetview?size=400x300&location=${lat},${lon}&radius=100&key=${apiKey}`;
             );
 
             const json = await response.json();
