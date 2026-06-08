@@ -68,7 +68,9 @@
             }
 
             // ✅ STREET VIEW IMAGE
-            const streetUrl = `https://maps.googleapis.com/maps/api/streetview?size=400x300&location=${lat},${lon}&key=${apiKey}`;
+            // ✅ UPDATED: Request the nearest panorama
+            // The 'radius' parameter tells Google to search within 50 meters
+            const streetUrl = `https://maps.googleapis.com/maps/api/streetview?size=400x300&location=${lat},${lon}&radius=50&key=${apiKey}`;
 
             svDiv.innerHTML = `
                 <img 
