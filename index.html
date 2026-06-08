@@ -68,17 +68,24 @@
             }
 
             // ✅ STREET VIEW IMAGE
-            // ✅ UPDATED: Request the nearest panorama
-            // The 'radius' parameter tells Google to search within 50 meters
+           // ✅ REPLACE your existing Street View block with this:
+            const svDiv = document.getElementById('streetview');
             const streetUrl = `https://maps.googleapis.com/maps/api/streetview?size=400x300&location=${lat},${lon}&radius=100&heading=0&pitch=0&key=${apiKey}`;
 
-            svDiv.innerHTML = `
-                <img 
-                    src="${streetUrl}" 
-                    alt="Street View"
-                    onerror="this.outerHTML='<p>No Street View available at this location.</p>'"
-                >
-            `;
+            const img = new Image();
+            img.src = streetUrl;
+            img.alt = "Street View";
+            img.style.width = "100%";
+            img.style.marginTop = "15px";
+
+            img.onload = () => {
+                svDiv.innerHTML = ""; // Clear any loading text
+                svDiv.appendChild(img);
+            };
+
+        img.onerror = () => {
+        svDiv.innerHTML = "<p>No Street View available at this location.</p>";
+        };
 
         } catch (error) {
             console.error(error);
