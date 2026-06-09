@@ -108,23 +108,28 @@
                 resultsDiv.innerHTML = "<p>No SLK results found.</p>";
             }
 
-            // Smaller Street View image
-            const streetUrl =
-                `https://maps.googleapis.com/maps/api/streetview?size=400x200&location=${encodeURIComponent(lat)},${encodeURIComponent(lon)}&radius=100&heading=0&pitch=0&key=${apiKey}`;
+            // ✅ STREET VIEW IMAGE
+            const streetUrl = `https://maps.googleapis.com/maps/api/streetview?size=400x300&location=${lat},${lon}&radius=100&heading=0&pitch=0&key=${apiKey}`;
 
             const img = new Image();
             img.src = streetUrl;
             img.alt = "Street View";
-            img.className = "streetview-img";
+            img.style.width = "50%";      // << smaller on page only
+            img.style.height = "auto";
+            img.style.marginTop = "15px";
+            img.style.borderRadius = "5px";
+            img.style.display = "block";
 
             img.onload = () => {
-                svDiv.innerHTML = "";
-                svDiv.appendChild(img);
+            svDiv.innerHTML = "";
+            svDiv.appendChild(img);
             };
 
-            img.onerror = () => {
-                svDiv.innerHTML = `<p class="note">No Street View available at this location.</p>`;
-            };
+img.onerror = () => {
+    console.log("Failed to load image from:", img.src);
+    svDiv.innerHTML = `<p>No Street View available at this location.</p>`;
+};
+``
 
         } catch (error) {
             console.error(error);
