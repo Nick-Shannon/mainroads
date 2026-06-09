@@ -4,51 +4,12 @@
     <meta charset="UTF-8">
     <title>SLK Lookup Engine</title>
     <style>
-        body {
-            font-family: sans-serif;
-            padding: 15px;
-            color: #333;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .result-box {
-            border: 1px solid #ccc;
-            padding: 10px;
-            border-radius: 5px;
-            background: #f9f9f9;
-        }
-
-        .result-item {
-            margin-bottom: 10px;
-        }
-
-        .loading {
-            color: #666;
-            font-style: italic;
-        }
-
-        .error {
-            color: red;
-        }
-
-        #streetview {
-            margin-top: 15px;
-        }
-
-        .streetview-img {
-            width: 50%;
-            max-width: 420px;
-            height: auto;
-            border-radius: 5px;
-            display: block;
-        }
-
-        .note {
-            color: #666;
-            font-size: 0.95em;
-            margin-top: 10px;
-        }
+        body { font-family: sans-serif; padding: 15px; color: #333; }
+        .result-box { border: 1px solid #ccc; padding: 10px; border-radius: 5px; background: #f9f9f9; }
+        .result-item { margin-bottom: 10px; }
+        img { height: auto; margin-top: 15px; border-radius: 5px; }
+        .loading { color: #666; font-style: italic; }
+        .error { color: red; }
     </style>
 </head>
 <body>
@@ -61,13 +22,13 @@
 </div>
 
 <script>
+    // GET PARAMETERS
     const params = new URLSearchParams(window.location.search);
     const lat = params.get('lat');
     const lon = params.get('lon');
 
-    // NOTE: If this page is live/public, consider rotating and re-checking
-    // API key restrictions in Google Cloud Console.
-    const apiKey = 'YOUR_GOOGLE_API_KEY_HERE';
+    // GOOGLE API KEY
+    const apiKey = 'AIzaSyAPii4yIjzG5fLVbgyv1W72ga9AokQV3CQ';
 
     if (!lat || !lon) {
         document.getElementById('results').innerHTML = "No coordinates provided.";
@@ -80,21 +41,17 @@
         const svDiv = document.getElementById('streetview');
 
         resultsDiv.innerHTML = "<p class='loading'>Fetching SLK data...</p>";
-        svDiv.innerHTML = "";
 
         try {
-            const irisUrl =
-                `https://publicirisservices.mainroads.wa.gov.au/GpsSlkWeb/GpsSlkWeb.svc/rest/GetPossibleSlks?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&tolerance=50`;
-
-            const response = await fetch(irisUrl);
-
-            if (!response.ok) {
-                throw new Error(`IRIS request failed with status ${response.status}`);
-            }
+            // IRIS API CALL
+            const response = await fetch(
+                `https://publicirisservices.mainroads.wa.gov.au/GpsSlkWeb/GpsSlkWeb.svc/rest/GetPossibleSlks?latitude=${lat}&longitude=${lon}&tolerance=50`
+            );
 
             const json = await response.json();
             const data = json.GetPossibleSlksResult || json;
 
+            // DISPLAY RESULTS
             if (data && data.length > 0) {
                 resultsDiv.innerHTML = data.map(item => `
                     <div class="result-item">
@@ -105,41 +62,34 @@
                     </div>
                 `).join("<hr>");
             } else {
-                resultsDiv.innerHTML = "<p>No SLK results found.</p>";
+                resultsDiv.innerHTML = "No SLK results found.";
             }
 
-            // ✅ STREET VIEW IMAGE
+            // STREET VIEW IMAGE - original lookup logic, smaller display only
             const streetUrl = `https://maps.googleapis.com/maps/api/streetview?size=400x300&location=${lat},${lon}&radius=100&heading=0&pitch=0&key=${apiKey}`;
 
             const img = new Image();
             img.src = streetUrl;
             img.alt = "Street View";
-            img.style.width = "50%";      // << smaller on page only
+            img.style.width = "50%";
             img.style.height = "auto";
             img.style.marginTop = "15px";
             img.style.borderRadius = "5px";
             img.style.display = "block";
 
             img.onload = () => {
-            svDiv.innerHTML = "";
-            svDiv.appendChild(img);
+                svDiv.innerHTML = "";
+                svDiv.appendChild(img);
             };
 
-img.onerror = () => {
-    console.log("Failed to load image from:", img.src);
-    svDiv.innerHTML = `<p>No Street View available at this location.</p>`;
-};
-``
+            img.onerror = () => {
+                console.log("Failed to load image from:", img.src);
+                svDiv.innerHTML = `<p>No Street View available at this location.</p>`;
+            };
 
         } catch (error) {
             console.error(error);
-
-            resultsDiv.innerHTML = `
-                <p class="error">Error fetching SLK data.</p>
-                <p class="note">
-                    If your browser is asking for local network access, the IRIS service may be resolving to a private/internal network address in your current environment.
-                </p>
-            `;
+            resultsDiv.innerHTML = "<p class='error'>Error fetching SLK data.</p>";
         }
     }
 </script>
